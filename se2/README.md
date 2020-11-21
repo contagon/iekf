@@ -6,11 +6,11 @@ The data generated for SE(2) comes from `system.py`, using `UnicycleSystem.gen_d
 
 The model is exactly (in the SE(2) Lie Group):
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/svgs/fff493ae8f8d9b9068e315eddac1b141.svg?invert_in_darkmode" align=middle width=302.2383606pt height=124.93263584999998pt/></p>
+<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/se2/svgs/fff493ae8f8d9b9068e315eddac1b141.svg?invert_in_darkmode" align=middle width=302.2383606pt height=124.93263584999998pt/></p>
 
 Where phi and v are the controls, and xi ~ N(0, Q), W_n ~ N(0, R). In regular coordinates (without noise), this looks like
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/svgs/459bf179f13d4081f8c7e9d9817d3415.svg?invert_in_darkmode" align=middle width=157.9623375pt height=115.66207785pt/></p>
+<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/se2/svgs/459bf179f13d4081f8c7e9d9817d3415.svg?invert_in_darkmode" align=middle width=157.9623375pt height=115.66207785pt/></p>
 
 ## Installation
 
