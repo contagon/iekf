@@ -6,11 +6,28 @@ The data generated for SE(2) comes from `system.py`, using `UnicycleSystem.gen_d
 
 The model is exactly (in the SE(2) Lie Group):
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/svgs/fff493ae8f8d9b9068e315eddac1b141.svg?invert_in_darkmode" align=middle width=302.2383606pt height=124.93263584999998pt/></p>
+\begin{align*}
+    X_{n+1} &= X_n
+\begin{bmatrix}
+\cos(\phi_n) & -\sin(\phi_n) & v_n \\
+\sin(_n) & \cos(\phi_n) & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix}  e^{\xi \string^} \\
+Z_n &= X_n 
+\begin{bmatrix}
+ 0\\ 0 \\ 1 
+\end{bmatrix} + W_n
+\end{align*}
 
 Where phi and v are the controls, and xi ~ N(0, Q), W_n ~ N(0, R). In regular coordinates (without noise), this looks like
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/svgs/459bf179f13d4081f8c7e9d9817d3415.svg?invert_in_darkmode" align=middle width=157.9623375pt height=115.66207785pt/></p>
+\begin{align*}
+    x_{n+1} &= x_n + v_n \cos(\theta) \\
+    y_{n+1} &= y_n + v_n \sin(\theta) \\
+    \theta_{n+1} &= \theta_n + \phi_n \\
+    z_{xn} &= x_n \\
+    z_{yn} &= y_n \\
+\end{align*}
 
 ## Installation
 
@@ -23,12 +40,12 @@ Then to install all required dependencies (basically just numpy and scipy), run
 ```
 pip install -r requirements.txt
 ```
-To render the latex in the README for github, you'll need latex, dvisvgm, and geometry installed on your system. To install, then compile run
+To render the latex in the README for github, you'll need latex, dvisvgm, and geometry installed on your system as well as readme2tex (included in requirements.txt). To install these, then compile the readme run:
 ```
 sudo apt install texlive-latex-base texlive-extra-utils
 python -m readme2tex --output README.md README_MATH.md
 ```
-
+Note these packages are rather large, so be warned!
 
 ## File Structure
 
