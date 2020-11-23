@@ -1,4 +1,3 @@
 numpy
 scipy
-readme2tex
 matplotlib

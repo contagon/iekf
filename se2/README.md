@@ -6,11 +6,32 @@ The data generated for SE(2) comes from `system.py`, using `UnicycleSystem.gen_d
 
 The model is exactly (in the SE(2) Lie Group):
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/se2/svgs/fff493ae8f8d9b9068e315eddac1b141.svg?invert_in_darkmode" align=middle width=302.2383606pt height=124.93263584999998pt/></p>
+<!-- \begin{align*}
+    X_{n+1} &= X_n
+\begin{bmatrix}
+\cos(\phi_n) & -\sin(\phi_n) & v_n \\
+\sin(_n) & \cos(\phi_n) & 0 \\
+0 & 0 & 1 \\
+\end{bmatrix}  e^{\xi \string^} \\
+Z_n &= X_n 
+\begin{bmatrix}
+ 0\\ 0 \\ 1 
+\end{bmatrix} + W_n
+\end{align*} -->
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Balign*%7D%20X_%7Bn&plus;1%7D%20%26%3D%20X_n%20%5Cbegin%7Bbmatrix%7D%20%5Ccos%28%5Cphi_n%29%20%26%20-%5Csin%28%5Cphi_n%29%20%26%20v_n%20%5C%5C%20%5Csin%28_n%29%20%26%20%5Ccos%28%5Cphi_n%29%20%26%200%20%5C%5C%200%20%26%200%20%26%201%20%5C%5C%20%5Cend%7Bbmatrix%7D%20e%5E%7B%5Cxi%20%5Cstring%5E%7D%20%5C%5C%20Z_n%20%26%3D%20X_n%20%5Cbegin%7Bbmatrix%7D%200%5C%5C%200%20%5C%5C%201%20%5Cend%7Bbmatrix%7D%20&plus;%20W_n%20%5Cend%7Balign*%7D"></p>
+
 
 Where phi and v are the controls, and xi ~ N(0, Q), W_n ~ N(0, R). In regular coordinates (without noise), this looks like
 
-<p align="center"><img src="https://rawgit.com/in	git@github.com:contagon/iekf/master/se2/svgs/459bf179f13d4081f8c7e9d9817d3415.svg?invert_in_darkmode" align=middle width=157.9623375pt height=115.66207785pt/></p>
+<!-- \begin{align*}
+    x_{n+1} &= x_n + v_n \cos(\theta) \\
+    y_{n+1} &= y_n + v_n \sin(\theta) \\
+    \theta_{n+1} &= \theta_n + \phi_n \\
+    z_{xn} &= x_n \\
+    z_{yn} &= y_n \\
+\end{align*} -->
+<p align="center"><img src="https://latex.codecogs.com/gif.latex?%5Cbegin%7Balign*%7D%20x_%7Bn&plus;1%7D%20%26%3D%20x_n%20&plus;%20v_n%20%5Ccos%28%5Ctheta%29%20%5C%5C%20y_%7Bn&plus;1%7D%20%26%3D%20y_n%20&plus;%20v_n%20%5Csin%28%5Ctheta%29%20%5C%5C%20%5Ctheta_%7Bn&plus;1%7D%20%26%3D%20%5Ctheta_n%20&plus;%20%5Cphi_n%20%5C%5C%20z_%7Bxn%7D%20%26%3D%20x_n%20%5C%5C%20z_%7Byn%7D%20%26%3D%20y_n%20%5C%5C%20%5Cend%7Balign*%7D"></p>
+
 
 ## Installation
 
@@ -23,12 +44,10 @@ Then to install all required dependencies (basically just numpy and scipy), run
 ```
 pip install -r requirements.txt
 ```
-To render the latex in the README for github, you'll need latex, dvisvgm, and geometry installed on your system. To install, then compile run
+To render latex images, we used https://www.codecogs.com/latex/eqneditor.php. Simply copy your equation in, then at the bottom, copy the "URL encoded" and put it into a html tag like this:
+```html
+<p align="center"><img src=""></p>
 ```
-sudo apt install texlive-latex-base texlive-extra-utils
-python -m readme2tex --output README.md README_MATH.md
-```
-
 
 ## File Structure
 
