@@ -166,8 +166,8 @@ class UnicycleSystem:
 
         Returns:
             xi^ (3,3 ndarray) : Element in Lie Algebra se(2)"""
-        return np.array([[0,   -xi[2], xi[0]],
-                        [xi[2], 0,     xi[1]],
+        return np.array([[0,   xi[2], xi[0]],
+                        [-xi[2], 0,     xi[1]],
                         [0,     0,     0]])
 
 # we do our testing down here

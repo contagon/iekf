@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # Run the ekf
     u = np.array([u(t) for t in range(t)])
-    ekf = ExtendedKalmanFilter(sys, x0, np.ones((3,3)))
+    ekf = ExtendedKalmanFilter(sys, x0, np.eye(3))
     mus, sigmas = ekf.iterate(u, z)
 
     # plot results

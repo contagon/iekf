@@ -68,8 +68,8 @@ class InvariantEKF:
             mu    (nxn ndarray) : Corrected state
             sigma (nxn ndarray) : Corrected covariances"""
 
-        H = np.array([[-1, 0, 0],
-                      [0, -1, 0]])
+        H = np.array([[1, 0, 0],
+                      [0, 1, 0]])
         zbar = self.sys.h(self.mu)
         zbar = zbar[:2]
         V = z - zbar
@@ -116,9 +116,9 @@ if __name__ == "__main__":
     #remove "1" from z
     z = z[:,:2]
 
-    # Run the ekf
+    # Run the iekf
     u = np.array([u(t) for t in range(t)])
-    iekf = InvariantEKF(sys, x0, np.ones((3,3)))
+    iekf = InvariantEKF(sys, x0, np.eye(3))
     mus, sigmas = iekf.iterate(u, z)
 
     # plot results
