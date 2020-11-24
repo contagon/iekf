@@ -3,7 +3,8 @@ import numpy as np
 import holodeck
 import sys
 from pynput import keyboard
-
+np.set_printoptions(suppress=True,
+   formatter={'float_kind':'{:0.2f}'.format}) 
 # get filename to save things as
 if len(sys.argv) > 1:
     filename = sys.argv[1]
@@ -11,8 +12,8 @@ else:
     filename = "data.npz"
 
 # install holodeck worlds if needed
-if "DefaultWorlds" not in holodeck.packagemanager.installed_packages():
-    holodeck.packagemanager.install("DefaultWorlds")
+if "Ocean" not in holodeck.packagemanager.installed_packages():
+    holodeck.packagemanager.install("Ocean", "https://robots.et.byu.edu/jenkins/job/holodeck-ocean-engine/job/develop/lastSuccessfulBuild/artifact/Ocean.zip")
 
 # These control the quadcopter
 command = np.array([0, 0, 0, 0])
@@ -22,7 +23,7 @@ def on_press(key):
         if key.char == "w":
             command[3] = 100
         if key.char == "s":
-            command[3] = -val0
+            command[3] = -val
 
         if key.char == "y":
             command[0] = val
@@ -67,14 +68,12 @@ def on_release(key):
         command[0] = 10000
 
 # set things up to save
-position = []
-velocity = []
-imu      = []
-pose     = []
-controls = []
+x = []
+z = []
+u = []
 
 # This is where the magic actually happens
-with holodeck.make("RedwoodForest-MaxDistance") as env:
+with holodeck.make("Rooms-IEKF") as env:
    # start keyboard listener
     listener = keyboard.Listener(
         on_press=on_press,
@@ -90,24 +89,29 @@ with holodeck.make("RedwoodForest-MaxDistance") as env:
         env.act("uav0", command)
         state = env.tick()
 
+        #make state
+        temp = np.eye(5)
+        temp[:4,:4] = state['PoseSensor']
+        temp[:3, 4] = state['VelocitySensor']
+        # flip velocity and position columns
+        temp[:3, [3,4]] = temp[:3, [4,3]]
+
         #save stuff we'll need
-        position.append( state['LocationSensor'] )
-        velocity.append( state['VelocitySensor'] )
-        imu.append( state['IMUSensor'] )
-        pose.append( state['OrientationSensor'] )
-        controls.append( command )
+        x.append(temp)
+        z.append(state['VelocitySensor'])
+        u.append(state['IMUSensor'])
 
+np.savez(filename, x=np.array(x), z=np.array(z), u=np.array(u))
 
-position = np.array(position)
-velocity = np.array(velocity)
-imu = np.array(imu)
-pose = np.array(pose)
-
-# since we're using the default holodeck... switch to RHS
-# TODO: Double check that this flipped everything (and the right things)
-position[:,1] *= -1
-velocity[:,1] *= -1
-imu[:,:,1] *= -1
-pose[:,:,1] *= -1
-
-np.savez(filename, position=position, velocity=velocity, imu=imu, pose=pose, controls=controls)
+# test Pose Sensor
+# import matplotlib.pyplot as plt
+# from pytransform3d.rotations import plot_basis
+# ax = plot_basis()
+# ax.set_xlim([-10,10])
+# ax.set_ylim([-10,10])
+# ax.set_zlim([-10,10])
+# ax.set_xlabel("X")
+# ax.set_ylabel("Y")
+# for xi in x[100:]:
+#     plot_basis(ax, xi[:3,:3], xi[:3,3], s=1, strict_check=False)
+# plt.show()
