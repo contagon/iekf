@@ -6,7 +6,7 @@ The data generated for SE(3) comes from holodeck (the original, not our fork). M
 
 First, if you'd like to make a conda environment, do it now. A simple command to make and activate a new environment is
 ```
-conda create -n iekf python=3.8
+conda create -n iekf python=3.7
 conda activate iekf
 ```
 Then to install all required dependencies, run
@@ -20,7 +20,7 @@ To start collecting data, simply run
 ```
 python data_gen.py filename.npz
 ```
-Where `filename.npz` is where the data will be saved. Note the first time things are run, it'll automatically download the required holodeck pacakges, which are ~3.5gb. 
+When you're reading to begin recording press `r`. Note sometimes the environment can run way too fast (like 400fps). Too lower this, with the window selected, type `~t.MaxFPS 30`. Also `filename.npz` is where the data will be saved. Note the first time things are run, it'll automatically download the required holodeck pacakges, which are ~300mb. 
 
 The controls for the quadcopter are:
 | Command | Forward Key | Backward Key|

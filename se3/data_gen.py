@@ -45,32 +45,40 @@ def on_press(key):
             key))
 
 def on_release(key):
-    if key.char == "w":
-        command[3] = 0
-    if key.char == "s":
-        command[3] = 0
+    try:
+        if key.char == "w":
+            command[3] = 0
+        if key.char == "s":
+            command[3] = 0
 
-    if key.char == "y":
-        command[0] = 0
-    if key.char == "u":
-        command[0] = 0
+        if key.char == "y":
+            command[0] = 0
+        if key.char == "u":
+            command[0] = 0
 
-    if key.char == "h":
-        command[1] = 0
-    if key.char == "j":
-        command[1] = 0
+        if key.char == "h":
+            command[1] = 0
+        if key.char == "j":
+            command[1] = 0
 
-    if key.char == "n":
-        command[2] = 0
-    if key.char == "m":
-        command[2] = 0
-    if key.char == "q":
-        command[0] = 10000
+        if key.char == "n":
+            command[2] = 0
+        if key.char == "m":
+            command[2] = 0
+
+        if key.char == "q":
+            command[0] = 1
+        if key.char == "r":
+            command[0] = -1
+    except AttributeError:
+        print('special key {0} pressed'.format(
+            key))
 
 # set things up to save
 x = []
 z = []
 u = []
+record = False
 
 # This is where the magic actually happens
 with holodeck.make("Rooms-IEKF") as env:
@@ -82,24 +90,27 @@ with holodeck.make("Rooms-IEKF") as env:
 
     #listen till we need to quit (by pressing q)
     while True:
-        if command[0] == 10000:
+        if command[0] == 1:
             break
+        if command[0] == -1:
+            record = True
 
         #send to holodeck
         env.act("uav0", command)
         state = env.tick()
 
         #make state
-        temp = np.eye(5)
-        temp[:4,:4] = state['PoseSensor']
-        temp[:3, 4] = state['VelocitySensor']
-        # flip velocity and position columns
-        temp[:3, [3,4]] = temp[:3, [4,3]]
+        if record:
+            temp = np.eye(5)
+            temp[:4,:4] = state['PoseSensor']
+            temp[:3, 4] = state['VelocitySensor']
+            # flip velocity and position columns
+            temp[:3, [3,4]] = temp[:3, [4,3]]
 
-        #save stuff we'll need
-        x.append(temp)
-        z.append(state['VelocitySensor'])
-        u.append(state['IMUSensor'])
+            #save stuff we'll need
+            x.append(temp)
+            z.append(state['VelocitySensor'])
+            u.append(state['IMUSensor'])
 
 np.savez(filename, x=np.array(x), z=np.array(z), u=np.array(u))
 
