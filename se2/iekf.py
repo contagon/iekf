@@ -40,16 +40,9 @@ class InvariantEKF:
             mu    (nxn ndarray) : Propagated state
             sigma (nxn ndarray) : Propagated covariances"""
         
-        # u, but in the Lie group?
-        u = np.array([[np.cos(u[1]), -np.sin(u[1]), u[0]],
-                      [np.sin(u[1]), np.cos(u[1]),  0],
-                      [0,             0,            1]])
         #get mubar and sigmabar
         mu_bar = self.sys.f_lie(self.mu, u)
-        adj_u = u
-        adj_u = np.array([[u[0,0], u[0,1], u[1,2]],
-                          [u[1,0], u[1,1], -u[0,2]],
-                          [u[2,0], u[2,1], u[2,2]]])
+        adj_u = self.sys.adjoint(expm(self.sys.carat( np.array([u[0], 0, u[1]])*self.sys.deltaT )))
         sigma_bar = adj_u @ self.sigma @ adj_u.T + self.sys.Q
 
         #save for use later
@@ -75,7 +68,9 @@ class InvariantEKF:
         V = z - zbar
 
         K = self.sigma @ H.T @ inv( H @ self.sigma @ H.T + self.sys.R )
-        self.mus[-1] = self.mu @ expm( self.sys.carat(K @ V) )
+        temp = K @ V
+        temp[2] *= -1
+        self.mus[-1] = self.mu @ expm( self.sys.carat(temp) )
         self.sigmas[-1] = (np.eye(3) - K @ H) @ self.sigma
 
         return self.mu, self.sigma
@@ -105,12 +100,12 @@ if __name__ == "__main__":
     Q = np.diag([.000001, .000001, .001])
     R = np.diag([.001, .001])
     dt = 0.1
-    sys = UnicycleSystem(Q, R)
+    sys = UnicycleSystem(Q, R, dt)
     x0 = np.zeros(3)
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)]) * dt
+    u = lambda t: np.array([1, np.sin(t/2)])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
 
     #remove "1" from z

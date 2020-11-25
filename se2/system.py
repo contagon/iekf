@@ -3,7 +3,7 @@ from scipy.linalg import expm
 
 class UnicycleSystem:
 
-    def __init__(self, Q, R):
+    def __init__(self, Q, R, deltaT):
         """The basic unicycle model. 
 
         Args:
@@ -11,6 +11,7 @@ class UnicycleSystem:
             R (2x2 nparray): Covariance of noise on measurements"""
         self.Q = Q
         self.R = R
+        self.deltaT = deltaT
 
     def gen_data(self, x0, u, t, noise=True):
         """Generates model data using Lie Group model.
@@ -37,7 +38,7 @@ class UnicycleSystem:
         elif len(u.shape) == 1:
             u = np.tile(u, (t,1))
         #as 2D/3D numpy array
-        
+
         x = np.zeros((t+1, 3, 3))
         z = np.zeros((t+1, 3))
 
@@ -48,13 +49,9 @@ class UnicycleSystem:
                             [0,             0,             1]])
         elif x0.shape != (3,3):
             raise ValueError("Wrong Sized Shape for x0!")
-        #convert u into Lie Group if needed
-        if u.shape == (t,2):
-            u = np.array([[np.cos(u[:,1]), -np.sin(u[:,1]), u[:,0]],
-                          [np.sin(u[:,1]),  np.cos(u[:,1]), np.zeros(t)],
-                          [np.zeros(t),     np.zeros(t),    np.ones(t)]])
-            u = np.transpose(u, (2, 0, 1))
-        elif u.shape != (t,3,3):
+
+        # convert u -> algebra -> group
+        if u.shape != (t,2):
             raise ValueError("Wrong Sized Shape for control!")
 
         x[0] = x0
@@ -77,10 +74,10 @@ class UnicycleSystem:
         Returns:
             X_{n+1} (3,3 ndarray)"""
         # do actual propagationg
-        new_state = state @ u
+        new_state = state @ expm(self.carat( np.array([u[0], 0, u[1]])*self.deltaT ))
         if noise:
-            xi        = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
-            new_state = new_state @ expm(self.carat(xi))
+            w        = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
+            new_state = new_state @ expm(self.carat(w))
 
         return new_state
 
@@ -94,8 +91,9 @@ class UnicycleSystem:
 
         Returns:
             X_{n+1} (3 ndarray)"""
-        x     = state[0] + u[0]*np.cos(state[2])
-        y     = state[1] + u[0]*np.sin(state[2])
+        u = u.copy() * self.deltaT
+        x     = state[0] + u[0]*np.cos(state[2] + u[1]/2)
+        y     = state[1] + u[0]*np.sin(state[2] + u[1]/2)
         theta = state[2] + u[1]
         new_state = np.array([x, y, theta])
 
@@ -159,16 +157,29 @@ class UnicycleSystem:
 
     @staticmethod
     def carat(xi):
-        """Moves an vector to the Lie Algebra.
+        """Moves an vector to the Lie Algebra se(3).
 
         Args:
             xi (3 ndarray) : Parametrization of Lie algebra
 
         Returns:
             xi^ (3,3 ndarray) : Element in Lie Algebra se(2)"""
-        return np.array([[0,   xi[2], xi[0]],
-                        [-xi[2], 0,     xi[1]],
+        return np.array([[0,   -xi[2], xi[0]],
+                        [xi[2], 0,     xi[1]],
                         [0,     0,     0]])
+
+    @staticmethod
+    def adjoint(xi):
+        """Takes adjoint of element in SE(3)
+
+        Args:
+            xi (3x3 ndarray) : Element in Lie Group
+
+        Returns:
+            Ad_xi (3,3 ndarray) : Adjoint in SE(3)"""
+        # make the swap
+        xi[0,2], xi[1,2] = xi[1,2], -xi[0,2]
+        return xi
 
 # we do our testing down here
 if __name__ == "__main__":
@@ -176,12 +187,12 @@ if __name__ == "__main__":
     Q = np.diag([.000001, .000001, .001])
     R = np.diag([.001, .001])
     dt = 0.1
-    sys = UnicycleSystem(Q, R)
+    sys = UnicycleSystem(Q, R, dt)
     x0 = np.zeros(3)
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)]) * dt
+    u = lambda t: np.array([1, np.sin(t/2)])
     xl, ul, zl = sys.gen_data(x0, u, t, noise=True)
 
     # generate data from standard method

@@ -87,12 +87,12 @@ if __name__ == "__main__":
     Q = np.diag([.000001, .000001, .001])
     R = np.diag([.001, .001])
     dt = 0.1
-    sys = UnicycleSystem(Q, R)
+    sys = UnicycleSystem(Q, R, dt)
     x0 = np.zeros(3)
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)]) * dt
+    u = lambda t: np.array([1, np.sin(t/2)])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
     #remove "1" from z
     z = z[:,:2]
