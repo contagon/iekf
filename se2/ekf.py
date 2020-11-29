@@ -36,7 +36,9 @@ class ExtendedKalmanFilter:
         #get mubar and sigmabar
         mu_bar = self.sys.f_standard(self.mu, u)
         F = self.sys.F(mu_bar, u)
-        sigma_bar = F@self.sigma@F.T + self.sys.Q
+        F_u = self.sys.F_u(mu_bar, u)
+        # TODO: Convert cov Q from noise on controls to noise on state?
+        sigma_bar = F@self.sigma@F.T + F_u@self.sys.Q[[0,2]][:,[0,2]]@F_u.T*self.sys.deltaT**2
 
         #save for use later
         self.mus.append( mu_bar )
@@ -84,7 +86,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # setup system
-    Q = np.diag([.000001, .000001, .001])
+    Q = np.diag([.001, 0, .1])
     R = np.diag([.001, .001])
     dt = 0.1
     sys = UnicycleSystem(Q, R, dt)
@@ -92,7 +94,7 @@ if __name__ == "__main__":
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)])
+    u = lambda t: np.array([t, 1])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
     #remove "1" from z
     z = z[:,:2]
@@ -103,9 +105,9 @@ if __name__ == "__main__":
     mus, sigmas = ekf.iterate(u, z)
 
     # plot results
+    plt.plot(mus[:,0], mus[:,1], label="EKF Results")
     plt.plot(x[:,0,2], x[:,1,2], label="Actual Location")
     plt.plot(z[:,0], z[:,1], label="Measurements", alpha=0.5)
-    plt.plot(mus[:,0], mus[:,1], label="EKF Results")
     plt.legend()
     plt.show()
 

@@ -6,7 +6,7 @@ from iekf import InvariantEKF
 from ekf import ExtendedKalmanFilter
 
  # setup system
-Q = np.diag([.000001, .000001, .001])
+Q = np.diag([.01, 0, .1])
 R = np.diag([.001, .001])
 dt = 0.1
 sys = UnicycleSystem(Q, R, dt)
@@ -14,7 +14,7 @@ x0 = np.zeros(3)
 
 # generate data from Lie Group method
 t = 100
-u = lambda t: np.array([1, np.sin(t/2)])
+u = lambda t: np.array([1, 3*np.sin(t/2)])
 u = np.array([u(t) for t in range(t)])
 x, _, z = sys.gen_data(x0, u, t, noise=True)
 

@@ -74,12 +74,12 @@ class UnicycleSystem:
         Returns:
             X_{n+1} (3,3 ndarray)"""
         # do actual propagating
-        new_state = state @ expm(self.carat( np.array([u[0], 0, u[1]])*self.deltaT ))
         if noise:
-            w        = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
-            new_state = new_state @ expm(self.carat(w))
+            w = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
+        else:
+            w = np.zeros(3)
 
-        return new_state
+        return state @ expm( self.carat( (np.array([u[0], 0, u[1]])+w)*self.deltaT ) )
 
     def f_standard(self, state, u, noise=False):
         """Propagates state forward in regular coordinates. Used for EKF.
@@ -91,15 +91,15 @@ class UnicycleSystem:
 
         Returns:
             X_{n+1} (3 ndarray)"""
-        u = u.copy() * self.deltaT
+        if noise:
+            w = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
+        else:
+            w = np.zeros(3)
+        u = (u.copy() + w[[0,2]])* self.deltaT
         x     = state[0] + u[0]*np.cos(state[2] + u[1]/2)
         y     = state[1] + u[0]*np.sin(state[2] + u[1]/2)
         theta = state[2] + u[1]
         new_state = np.array([x, y, theta])
-
-        if noise:
-            w = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
-            new_state += w
 
         return new_state
 
@@ -143,6 +143,19 @@ class UnicycleSystem:
                         [0, 1, 0],
                         [-u[0]*np.sin(state[2]), u[0]*np.cos(state[2]), 1]])
 
+    def F_u(self, state, u):
+        """Jacobian of system using standard coordinates. Used for EKF.
+
+         Args:
+            state (3 ndarray) : X_n of model in coordinates
+            u     (3 ndarray) : U_n of model in standard coordinates
+
+        Returns:
+            df / dx (3,3 ndarray)"""
+        return np.array([[np.cos(state[2] + u[1]/2), -np.sin(state[2] + u[1]/2)],
+                        [np.sin(state[2] + u[1]/2), np.cos(state[2] + u[1]/2)],
+                        [0, 1]])
+
     def H(self, state):
         """Jacobian of measurement model using standard coordinates. Used for EKF.
 
@@ -184,7 +197,7 @@ class UnicycleSystem:
 # we do our testing down here
 if __name__ == "__main__":
     # setup system
-    Q = np.diag([.000001, .000001, .001])
+    Q = np.diag([.001, 0, .1])
     R = np.diag([.001, .001])
     dt = 0.1
     sys = UnicycleSystem(Q, R, dt)
