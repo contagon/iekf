@@ -4,12 +4,18 @@ import holodeck
 import sys
 from pynput import keyboard
 np.set_printoptions(suppress=True,
-   formatter={'float_kind':'{:0.2f}'.format}) 
+   formatter={'float_kind':'{:0.5f}'.format}) 
 # get filename to save things as
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 else:
     filename = "data.npz"
+
+# get number of ticks per second
+if len(sys.argv) > 2:
+    ticks = int(sys.argv[2])
+else:
+    ticks = 60
 
 # install holodeck worlds if needed
 if "Ocean" not in holodeck.packagemanager.installed_packages():
@@ -17,13 +23,13 @@ if "Ocean" not in holodeck.packagemanager.installed_packages():
 
 # These control the quadcopter
 command = np.array([0, 0, 0, 0])
-val = 5
+val = 2
 def on_press(key):
     try:
         if key.char == "w":
             command[3] = 100
         if key.char == "s":
-            command[3] = -val
+            command[3] = -100
 
         if key.char == "y":
             command[0] = val
@@ -67,9 +73,9 @@ def on_release(key):
             command[2] = 0
 
         if key.char == "q":
-            command[0] = 1
+            command[3] = 1
         if key.char == "r":
-            command[0] = -1
+            command[3] = -1
     except AttributeError:
         print('special key {0} pressed'.format(
             key))
@@ -80,8 +86,8 @@ z = []
 u = []
 record = False
 
-# This is where the magic actually happens
-with holodeck.make("Rooms-IEKF") as env:
+# This is where the magic actually uhappens
+with holodeck.make("Rooms-IEKF", ticks_per_sec=ticks) as env:
    # start keyboard listener
     listener = keyboard.Listener(
         on_press=on_press,
@@ -90,9 +96,9 @@ with holodeck.make("Rooms-IEKF") as env:
 
     #listen till we need to quit (by pressing q)
     while True:
-        if command[0] == 1:
+        if command[3] == 1:
             break
-        if command[0] == -1:
+        if command[3] == -1:
             record = True
 
         #send to holodeck
@@ -112,7 +118,9 @@ with holodeck.make("Rooms-IEKF") as env:
             z.append(state['VelocitySensor'])
             u.append(state['IMUSensor'])
 
-np.savez(filename, x=np.array(x), z=np.array(z), u=np.array(u))
+if record:
+    np.savez(filename, x=np.array(x), z=np.array(z), u=np.array(u), ticks=ticks)
+    print("Data Saved.")
 
 # test Pose Sensor
 # import matplotlib.pyplot as plt

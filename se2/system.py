@@ -24,7 +24,7 @@ class UnicycleSystem:
 
         Returns:
             x (t,3,3 ndarray) : x steps after x0 
-            u (t,3,3 ndarray) : controls that were applied
+            u   (t,3 ndarray) : controls that were applied
             z   (t,3 ndarray) : measurements taken.
         """
         #Accept various forms of u. Parse them here
@@ -68,12 +68,12 @@ class UnicycleSystem:
 
         Args:
             state (3,3 ndarray) : X_n of model in Lie Group
-            u     (3,3 ndarray) : U_n of model as a Lie Group element
+            u     (3,3 ndarray) : U_n of model as a vector
             noise        (bool) : Whether or not to add noise. Defaults to False.
 
         Returns:
             X_{n+1} (3,3 ndarray)"""
-        # do actual propagationg
+        # do actual propagating
         new_state = state @ expm(self.carat( np.array([u[0], 0, u[1]])*self.deltaT ))
         if noise:
             w        = np.random.multivariate_normal(mean=np.zeros(3), cov=self.Q)
