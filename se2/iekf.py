@@ -65,7 +65,8 @@ class InvariantEKF:
                       [0, 1, 0]])
         V = ( inv( self.mu )@z - self.sys.b )[:-1]
 
-        K = self.sigma @ H.T @ inv( H @ self.sigma @ H.T + self.sys.R )
+        invmu = inv(self.mu)[:2,:2]
+        K = self.sigma @ H.T @ inv( H@self.sigma@H.T + invmu@self.sys.R@invmu.T )
         self.mus[-1] = self.mu @ expm( self.sys.carat(K @ V) )
         self.sigmas[-1] = (np.eye(3) - K @ H) @ self.sigma
 
