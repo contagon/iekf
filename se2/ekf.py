@@ -36,7 +36,8 @@ class ExtendedKalmanFilter:
         #get mubar and sigmabar
         mu_bar = self.sys.f_standard(self.mu, u)
         F = self.sys.F(mu_bar, u)
-        sigma_bar = F@self.sigma@F.T + self.sys.Q
+        F_u = self.sys.F_u(mu_bar, u)
+        sigma_bar = F@self.sigma@F.T + F_u@self.sys.Q[[0,2]][:,[0,2]]@F_u.T * self.sys.deltaT**2
 
         #save for use later
         self.mus.append( mu_bar )
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # setup system
-    Q = np.diag([.000001, .000001, .001])
+    Q = np.diag([.001, 0, .1])
     R = np.diag([.001, .001])
     dt = 0.1
     sys = UnicycleSystem(Q, R, dt)
@@ -93,6 +94,7 @@ if __name__ == "__main__":
     # generate data from Lie Group method
     t = 100
     u = lambda t: np.array([t, 1])
+    u = lambda t: np.array([1, np.sin(t/2)])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
     #remove "1" from z
     z = z[:,:2]

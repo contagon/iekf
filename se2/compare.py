@@ -5,20 +5,20 @@ from system import UnicycleSystem
 from iekf import InvariantEKF
 from ekf import ExtendedKalmanFilter
 
- # setup system
-Q = np.diag([.000001, .000001, .001])
+# setup system
+Q = np.diag([.001, 0, .1])
 R = np.diag([.001, .001])
 dt = 0.1
 sys = UnicycleSystem(Q, R, dt)
 x0 = np.zeros(3)
 
 # generate data from Lie Group method
-t = 100
+t = 50
 u = lambda t: np.array([1, np.sin(t/2)])
-u = np.array([u(t) for t in range(t)])
-x, _, z = sys.gen_data(x0, u, t, noise=True)
+u = lambda t: np.array([t, 1])
+x, u, z = sys.gen_data(x0, u, t, noise=True)
 
-
+x0 = np.array([10, 10, np.pi])
 # Run the iekf
 iekf = InvariantEKF(sys, x0, np.eye(3))
 mus_iekf, sigmas = iekf.iterate(u, z)

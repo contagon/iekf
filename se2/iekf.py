@@ -43,7 +43,7 @@ class InvariantEKF:
         #get mubar and sigmabar
         mu_bar = self.sys.f_lie(self.mu, u)
         adj_u = self.sys.adjoint( inv(expm(self.sys.carat( np.array([u[0], 0, u[1]])*self.sys.deltaT ))) )
-        sigma_bar = adj_u @ self.sigma @ adj_u.T + self.sys.Q
+        sigma_bar = adj_u @ self.sigma @ adj_u.T + self.sys.Q * self.sys.deltaT**2
 
         #save for use later
         self.mus.append( mu_bar )
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     # setup system
-    Q = np.diag([.000001, .000001, .001])
+    Q = np.diag([.001, 0, .1])
     R = np.diag([.001, .001])
     dt = 0.1
     sys = UnicycleSystem(Q, R, dt)
