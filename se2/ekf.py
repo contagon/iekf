@@ -92,7 +92,7 @@ if __name__ == "__main__":
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)])
+    u = lambda t: np.array([t, 1])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
     #remove "1" from z
     z = z[:,:2]

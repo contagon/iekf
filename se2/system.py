@@ -12,6 +12,7 @@ class UnicycleSystem:
         self.Q = Q
         self.R = R
         self.deltaT = deltaT
+        self.b = np.array([0, 0, 1])
 
     def gen_data(self, x0, u, t, noise=True):
         """Generates model data using Lie Group model.
@@ -92,8 +93,8 @@ class UnicycleSystem:
         Returns:
             X_{n+1} (3 ndarray)"""
         u = u.copy() * self.deltaT
-        x     = state[0] + u[0]*np.cos(state[2] + u[1]/2)
-        y     = state[1] + u[0]*np.sin(state[2] + u[1]/2)
+        x     = state[0] + u[0]*np.cos(state[2])
+        y     = state[1] + u[0]*np.sin(state[2])
         theta = state[2] + u[1]
         new_state = np.array([x, y, theta])
 
@@ -120,8 +121,7 @@ class UnicycleSystem:
             z = np.array([state[0], state[1]])
         # using Lie Group
         elif state.shape == (3,3):
-            b = np.array([0, 0, 1])
-            z = state @ b
+            z = state @ self.b
 
         #add noise if needed
         if noise:
@@ -139,9 +139,9 @@ class UnicycleSystem:
 
         Returns:
             df / dx (3,3 ndarray)"""
-        return np.array([[1, 0, 0],
-                        [0, 1, 0],
-                        [-u[0]*np.sin(state[2]), u[0]*np.cos(state[2]), 1]])
+        return np.array([[1, 0, -u[0]*np.sin(state[2])],
+                         [0, 1,  u[0]*np.cos(state[2])],
+                         [0, 0,  1]])
 
     def H(self, state):
         """Jacobian of measurement model using standard coordinates. Used for EKF.

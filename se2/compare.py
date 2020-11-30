@@ -18,17 +18,15 @@ u = lambda t: np.array([1, np.sin(t/2)])
 u = np.array([u(t) for t in range(t)])
 x, _, z = sys.gen_data(x0, u, t, noise=True)
 
-#remove "1" from z
-z = z[:,:2]
-
-
-# Run the ekf
-ekf = ExtendedKalmanFilter(sys, x0, np.eye(3))
-mus_ekf, sigmas = ekf.iterate(u, z)
 
 # Run the iekf
 iekf = InvariantEKF(sys, x0, np.eye(3))
 mus_iekf, sigmas = iekf.iterate(u, z)
+
+# Run the ekf
+z = z[:,:2]
+ekf = ExtendedKalmanFilter(sys, x0, np.eye(3))
+mus_ekf, sigmas = ekf.iterate(u, z)
 
 # plot results
 plt.plot(x[:,0,2], x[:,1,2], label="Actual Location")

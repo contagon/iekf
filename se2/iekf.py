@@ -42,7 +42,7 @@ class InvariantEKF:
         
         #get mubar and sigmabar
         mu_bar = self.sys.f_lie(self.mu, u)
-        adj_u = self.sys.adjoint(expm(self.sys.carat( np.array([u[0], 0, u[1]])*self.sys.deltaT )))
+        adj_u = self.sys.adjoint( inv(expm(self.sys.carat( np.array([u[0], 0, u[1]])*self.sys.deltaT ))) )
         sigma_bar = adj_u @ self.sigma @ adj_u.T + self.sys.Q
 
         #save for use later
@@ -63,14 +63,10 @@ class InvariantEKF:
 
         H = np.array([[1, 0, 0],
                       [0, 1, 0]])
-        zbar = self.sys.h(self.mu)
-        zbar = zbar[:2]
-        V = z - zbar
+        V = ( inv( self.mu )@z - self.sys.b )[:-1]
 
         K = self.sigma @ H.T @ inv( H @ self.sigma @ H.T + self.sys.R )
-        temp = K @ V
-        temp[2] *= -1
-        self.mus[-1] = self.mu @ expm( self.sys.carat(temp) )
+        self.mus[-1] = self.mu @ expm( self.sys.carat(K @ V) )
         self.sigmas[-1] = (np.eye(3) - K @ H) @ self.sigma
 
         return self.mu, self.sigma
@@ -105,11 +101,8 @@ if __name__ == "__main__":
 
     # generate data from Lie Group method
     t = 100
-    u = lambda t: np.array([1, np.sin(t/2)])
+    u = lambda t: np.array([t/10, 1])
     x, _, z = sys.gen_data(x0, u, t, noise=True)
-
-    #remove "1" from z
-    z = z[:,:2]
 
     # Run the iekf
     u = np.array([u(t) for t in range(t)])
