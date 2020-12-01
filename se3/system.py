@@ -12,14 +12,14 @@ class QuadcopterSystem:
 
         Args:
             filename  (str) : Where the recorded data has been stored
-            Q (3,3 nparray) : Covariance of noise on state
-            R (2x2 nparray) : Covariance of noise on measurements
-            deltaT    (int) : Time between each timestep"""
+            Q (9,9 nparray) : Covariance of noise on state
+            R (3x3 nparray) : Covariance of noise on measurements"""
         self.Q = Q
         self.R = R
         self.data = np.load(filename)
         self.deltaT = 1 / self.data['ticks']
         self.T = self.data['x'].shape[0]
+        self.b = np.array([0, 0, 0, 1.0, 0])
 
     def gen_data(self, t, noise=True):
         """Generates model data using Lie Group model.
@@ -76,7 +76,8 @@ class QuadcopterSystem:
             w = np.random.multivariate_normal(mean=np.zeros(9), cov=self.Q)
         else:
             w = np.zeros(9)
-        return state @ expm( self.carat( (u_vec + w)*self.deltaT ) )
+        U = expm( self.carat( (u_vec + w)*self.deltaT ) )
+        return (state @ U), U
 
     def h(self, state, noise=False):
         """Calculates measurement given a state. Note that the result is
@@ -106,7 +107,7 @@ class QuadcopterSystem:
 
         Returns:
             X_{n+1} (3 ndarray)"""
-        raise NotImplementedError("Not impelmented in standard coordinates yet.")
+        raise NotImplementedError("Not implemented in standard coordinates yet.")
 
     def F(self, state, u):
         """Jacobian of system using standard coordinates. Used for EKF.
@@ -117,7 +118,7 @@ class QuadcopterSystem:
 
         Returns:
             df / dx (3,3 ndarray)"""
-        raise NotImplementedError("Not impelmented in standard coordinates yet.")
+        raise NotImplementedError("Not implemented in standard coordinates yet.")
 
     def H(self, state):
         """Jacobian of measurement model using standard coordinates. Used for EKF.
@@ -128,7 +129,7 @@ class QuadcopterSystem:
 
         Returns:
             dh / dx (3,3 ndarray)"""
-        raise NotImplementedError("Not impelmented in standard coordinates yet.")
+        raise NotImplementedError("Not implemented in standard coordinates yet.")
 
     @staticmethod
     def cross(x):
