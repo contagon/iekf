@@ -59,8 +59,7 @@ class InvariantEKF:
                       [0, 0, 0, 0, 1, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0, 1, 0, 0, 0]])
 
-        b = np.array([0, 0, 0, 1, 0])
-        z = np.array([z[0], z[1], z[2], 0, 0])
+        z = np.array([z[0], z[1], z[2], 1, 0])
         V = ( inv( self.mu )@z - self.sys.b )[:-2]
 
         invmu = inv(self.mu)[:3,:3]
