@@ -30,7 +30,7 @@ iterations = range(-20, 21)
 angle_increment = 2*np.pi / (len(iterations) - 1)
 angle = -np.pi
 
-angle_final = np.unwrap(np.arctan2(x[:,0,0], x[:,0,1]))[-1]
+angle_final = -np.unwrap(np.arctan2(x[:,0,1], x[:,0,0]))[-1]
 
 # make all plots and titles
 sns.set(font_scale=0.85)
@@ -72,7 +72,7 @@ for i in iterations:
     ekf = ExtendedKalmanFilter(sys, xs, np.eye(3))
     mus_ekf, sigmas = ekf.iterate(u, z_trunc)
     # mus_ekf[:,2] = (mus_ekf[:,2] + np.pi) % (2 * np.pi) - np.pi # Convert angles to be between -pi and pi
-    mus_ekf[:,2] = shift_to_final(angle_final, np.unwrap(mus_ekf[:,2])) + np.pi/2
+    mus_ekf[:,2] = shift_to_final(angle_final, np.unwrap(mus_ekf[:,2]))
 
     # plot x y and thetas
     ax[0,0].plot(xaxis, mus_ekf[:,0], '--')
@@ -81,16 +81,16 @@ for i in iterations:
 
     ax[1,0].plot(xaxis, mus_iekf[:,0,2], '--')
     ax[1,1].plot(xaxis, mus_iekf[:,1,2], '--')
-    ax[1,2].plot(xaxis, shift_to_final(angle_final, np.unwrap(np.arctan2(mus_iekf[:,0,0], mus_iekf[:,0,1]))), '--')
+    ax[1,2].plot(xaxis, shift_to_final(angle_final, -np.unwrap(np.arctan2(mus_iekf[:,0,1], mus_iekf[:,0,0]))), '--')
 
 # plot true states
 ax[0,0].plot(xaxis, x[:,0,2], 'k')
 ax[0,1].plot(xaxis, x[:,1,2], 'k')
-ax[0,2].plot(xaxis, np.unwrap(np.arctan2(x[:,0,0], x[:,0,1])), 'k')
+ax[0,2].plot(xaxis, -np.unwrap(np.arctan2(x[:,0,1], x[:,0,0])), 'k')
 
 ax[1,0].plot(xaxis, x[:,0,2], 'k')
 ax[1,1].plot(xaxis, x[:,1,2], 'k')
-ax[1,2].plot(xaxis, np.unwrap(np.arctan2(x[:,0,0], x[:,0,1])), 'k')
+ax[1,2].plot(xaxis, -np.unwrap(np.arctan2(x[:,0,1], x[:,0,0])), 'k')
 
 # shrink tick labels
 # TODO Does this need to happen?
