@@ -114,4 +114,6 @@ left=0.061,
 right=0.992,
 hspace=0.283,
 wspace=0.292)
-plt.show()
+# plt.show()
+
+plt.savefig('figure.pdf', bbox_inches='tight')
