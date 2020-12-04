@@ -47,9 +47,10 @@ ax[0,1].set_title('y')
 ax[0,2].set_title('theta')
 state = [r"$x$", r"$y$", r"$\theta$"]
 algo = ["EKF", "IEKF"]
+labels = [["(a) ", "(d) "], ["(b) ", "(e) "], ["(c) ", "(f) "]]
 for i in range(3):
     for j in range(2):
-        ax[j,i].set_title(f"{algo[j]}: {state[i]}")
+        ax[j,i].set_title(f"{labels[i][j]}{algo[j]}: {state[i]}")
         # TODO: Do these need labels?
         # if i == 0:
         #     ax[j,i].set_ylabel("Meters")
@@ -101,7 +102,7 @@ ax[1,2].plot(xaxis, -np.unwrap(np.arctan2(x[:,0,1], x[:,0,0])), 'k')
 #         ax[i,j].set_yticklabels(ax[i,j].get_yticks(), size=10)
 
 # plot trajectories of the last run
-axbig.set_title('Example Trajectory')
+axbig.set_title('(g) Example Trajectory')
 axbig.plot(x[:,0,2], x[:,1,2], label="Actual Location")
 axbig.plot(z[:,0], z[:,1], label="Measurements", alpha=0.5)
 axbig.plot(mus_ekf[:,0], mus_ekf[:,1], label="EKF Results")
