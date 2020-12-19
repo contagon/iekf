@@ -61,14 +61,16 @@ class InvariantEKF:
             mu    (nxn ndarray) : Corrected state
             sigma (nxn ndarray) : Corrected covariances"""
 
-        H = np.array([[1, 0, 0],
-                      [0, 1, 0]])
-        V = ( inv( self.mu )@z - self.sys.b )[:-1]
+        H = np.array([[0, 1, 0]])
+        z[0] = self.mu[0,2]
+        V = ( inv( self.mu )@z - self.sys.b )[1:-1]
 
-        invmu = inv(self.mu)[:2,:2]
-        K = self.sigma @ H.T @ inv( H@self.sigma@H.T + invmu@self.sys.R@invmu.T )
+        invmu = inv(self.mu)
+        R = np.diag([0, self.sys.R[1,1], 0])
+        K = self.sigma @ H.T @ inv( H@self.sigma@H.T + (invmu@R@invmu.T)[1,1] )
         self.mus[-1] = self.mu @ expm( self.sys.carat(K @ V) )
         self.sigmas[-1] = (np.eye(3) - K @ H) @ self.sigma
+        print(self.sigma[1,1])
 
         return self.mu, self.sigma
 
@@ -111,8 +113,19 @@ if __name__ == "__main__":
     mus, sigmas = iekf.iterate(u, z)
 
     # plot results
-    plt.plot(x[:,0,2], x[:,1,2], label="Actual Location")
-    plt.plot(z[:,0], z[:,1], label="Measurements", alpha=0.5)
-    plt.plot(mus[:,0,2], mus[:,1,2], label="iEKF Results")
+    # plt.plot(x[:,0,2], x[:,1,2], label="Actual Location")
+    # plt.plot(z[:,0], z[:,1], label="Measurements", alpha=0.5)
+    # plt.plot(mus[:,0,2], mus[:,1,2], label="iEKF Results")
+    # plt.legend()
+    # plt.show()
+
+    t = np.arange(t)
+    plt.subplot(211)
+    plt.plot(t, x[:,0,2], label="Actual X")
+    plt.plot(t, mus[:,0,2], label="iEKF X")
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(t, x[:,1,2], label="Actual Y")
+    plt.plot(t, mus[:,1,2], label="iEKF Y")
     plt.legend()
     plt.show()
