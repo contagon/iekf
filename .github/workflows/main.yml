@@ -27,10 +27,12 @@ jobs:
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 readme/output-%03d.jpg
     - name: Update Readme
       run: |
+        rm -rf readme
+        mkdir readme
         cp /dev/null README.md
-        for filename in readme/*.jpg; do                       \
-            echo '![image](readme/'$filename')' >> README.md;  \
-        done                                                   \
+        for filename in readme/*.jpg; do                \
+            echo '![image]('$filename')' >> README.md;  \
+        done                                            \
     - name: Commit files
       run: |
         git add .
