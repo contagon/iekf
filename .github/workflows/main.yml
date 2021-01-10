@@ -28,9 +28,6 @@ jobs:
     - name: Update Readme
       run: |
         cp /dev/null README.md
-        for filename in readme/*.jpg; do                      \
-            echo '![image](readme/'$filename')' >> README.md  \
-        done                                                  \
     - name: Commit files
       run: |
         git add .
