@@ -20,6 +20,11 @@ jobs:
       with:
         persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Clean up previous files
+      run: | 
+        rm -rf readme
+        mkdir readme
+        cp /dev/null README.md
     - name: Convert Writeup to Images
       uses: jruipinto/ImageMagick-action@v1
       with:
@@ -27,9 +32,6 @@ jobs:
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 readme/output-%03d.jpg
     - name: Update Readme
       run: |
-        rm -rf readme
-        mkdir readme
-        cp /dev/null README.md
         for filename in readme/*.jpg; do                \
             echo '![image]('$filename')' >> README.md;  \
         done                                            \
