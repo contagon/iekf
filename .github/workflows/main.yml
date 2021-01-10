@@ -27,6 +27,7 @@ jobs:
         command: convert -density 150 writeup.pdf -quality 90 readme/output-%3d.jpg
     - name: Commit files
       run: |
+        git add .
         git config --local user.email "contagon6@gmail.com"
         git config --local user.name "GithubActions"
         git commit -m "Update Readme" -a
