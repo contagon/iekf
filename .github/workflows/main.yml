@@ -16,6 +16,12 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+    - name: Delete old orphan branch
+      uses: dawidd6/action-delete-branch@v3
+      continue-on-error: true
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branches: readme_images
     - uses: actions/checkout@v2
       with:
         persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
@@ -27,8 +33,6 @@ jobs:
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
     - name: Commit to orphan branch
       run: | 
-        git push origin :readme_images
-        git branch -D readme_images
         git checkout --orphan readme_images
         touch .README.md
         mv .README.md .README.temp
