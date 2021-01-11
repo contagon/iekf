@@ -1,16 +1,14 @@
-# This is a basic workflow to help you get started with Actions
+###### Copyright Easton Potokar, 2020
 
 name: Writeup-Readme
 
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: 
-      - '*'
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+      - 'master'
+    paths:
+      - 'writeup.pdf'
+      - '.README.md'
 
 jobs:
   run:
@@ -18,14 +16,17 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+        persist-credentials: false
+        fetch-depth: 0
+
+    ## CONVERT THE ACTUAL IMAGES
     - name: Convert Writeup to Images
       uses: jruipinto/ImageMagick-action@v1
       with:
-        # ImageMagick command to be executed
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
-    - name: Commit to orphan branch
+
+    ## COMMIT THEM TO A ORPHAN BRANCH
+    - name: Commit images to orphan branch
       run: | 
         git checkout --orphan readme_images
         touch .README.md
@@ -41,6 +42,8 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: readme_images
         force: true
+
+    ## UPDATE README IN BRANCH IF IT NEEDS TO BE UPDATED
     - name: Update Readme
       id: main
       run: |
