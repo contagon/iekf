@@ -16,12 +16,6 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - name: Delete old orphan branch
-      uses: dawidd6/action-delete-branch@v3
-      continue-on-error: true
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branches: readme_images
     - uses: actions/checkout@v2
       with:
         persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal token
@@ -46,6 +40,7 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: readme_images
+        force: true
     - name: Update Readme
       id: main
       run: |
