@@ -1,0 +1,71 @@
+###### Copyright Easton Potokar, 2020
+
+name: Writeup-Readme
+
+on:
+  push:
+    branches: 
+      - 'master'
+    paths:
+      - 'writeup.pdf'
+      - '.README.md'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        persist-credentials: false
+        fetch-depth: 0
+
+    ## CONVERT THE ACTUAL IMAGES
+    - name: Convert Writeup to Images
+      uses: jruipinto/ImageMagick-action@v1
+      with:
+        command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
+
+    ## COMMIT THEM TO A ORPHAN BRANCH
+    - name: Commit images to orphan branch
+      run: | 
+        git checkout --orphan readme_images
+        touch .README.md
+        mv .README.md .README.temp
+        git rm -rf .
+        git add *.jpg
+        git config --local user.email "action@github.com"
+        git config --local user.name "GithubActions"
+        git commit -m "Updated writeup images" -a
+    - name: Push images to orphan branch
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: readme_images
+        force: true
+
+    ## UPDATE README IN BRANCH IF IT NEEDS TO BE UPDATED
+    - name: Update Readme
+      id: main
+      run: |
+        echo '' >> .README.temp
+        for filename in *.jpg; do \
+          echo '![image](https://github.com/'$GITHUB_REPOSITORY'/blob/readme_images/'$filename'?raw=true)' >> .README.temp;  \
+        done
+        git checkout ${{ github.ref }}
+        rm README.md
+        mv .README.temp README.md
+        OUTPUT=0
+        git diff --exit-code README.md || OUTPUT=$?
+        echo "::set-output name=OUTPUT::$OUTPUT"
+    - name: Commit new README (if changed)
+      if: steps.main.outputs.OUTPUT == 1
+      run: |
+        git add README.md
+        git config --local user.email "action@github.com"
+        git config --local user.name "GithubActions"
+        git commit -m "Updated Readme" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
