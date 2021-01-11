@@ -47,7 +47,7 @@ jobs:
     - name: Update Readme
       id: main
       run: |
-        echo '' >> .README.temp
+        echo $'\n' >> .README.temp
         for filename in *.jpg; do \
           echo '![image](https://github.com/'$GITHUB_REPOSITORY'/blob/readme_images/'$filename'?raw=true)' >> .README.temp;  \
         done
