@@ -23,7 +23,7 @@ jobs:
     - name: Convert Writeup to Images
       uses: jruipinto/ImageMagick-action@v1
       with:
-        command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
+        command: convert -density 250 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 85 output-%03d.jpg
 
     ## COMMIT THEM TO A ORPHAN BRANCH
     - name: Commit images to orphan branch
@@ -52,7 +52,7 @@ jobs:
           echo '![image](https://github.com/'$GITHUB_REPOSITORY'/blob/readme_images/'$filename'?raw=true)' >> .README.temp;  \
         done
         git checkout ${{ github.ref }}
-        rm README.md
+        rm README.md || (exit 0)
         mv .README.temp README.md
         OUTPUT=0
         git diff --exit-code README.md || OUTPUT=$?
