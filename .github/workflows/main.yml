@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Writeup-Readme
 
 # Controls when the action will run. 
 on:
@@ -13,8 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  writeup:
-    name: Push Writeup to Readme
+  run:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,8 +27,8 @@ jobs:
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
     - name: Commit to orphan branch
       run: | 
-        git push origin :readme_images || (exit 0)
-        git branch -D readme_images || (exit 0)
+        git push origin :readme_images
+        git branch -D readme_images
         git checkout --orphan readme_images
         touch .README.md
         mv .README.md .README.temp
@@ -55,6 +54,7 @@ jobs:
         mv .README.temp README.md
         CHANGED=0
         git diff --exit-code README.md || CHANGED=$?
+        echo $CHANGED
     - name: Commit new README (if changed)
       if: steps.main.outputs.CHANGED == 1
       run: |
