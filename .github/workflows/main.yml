@@ -49,8 +49,8 @@ jobs:
         git checkout ${{ github.ref }}
         rm README.md
         mv .README.temp README.md
-        git diff --exit-code README.md
-        CHANGED=$?
+        CHANGED=0
+        git diff --exit-code README.md || CHANGED=$?
     - name: Commit new README (if changed)
       if: steps.main.outputs.CHANGED == 1
       run: |
