@@ -13,7 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  writeup:
+    name: Push Writeup to Readme
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -27,6 +28,8 @@ jobs:
         command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
     - name: Commit to orphan branch
       run: | 
+        git push origin :readme_images || (exit 0)
+        git branch -D readme_images || (exit 0)
         git checkout --orphan readme_images
         touch .README.md
         mv .README.md .README.temp
@@ -41,6 +44,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: readme_images
     - name: Update Readme
+      id: main
       run: |
         echo '' >> .README.temp
         for filename in *.jpg; do \
