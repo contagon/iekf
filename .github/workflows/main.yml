@@ -24,7 +24,7 @@ jobs:
       uses: jruipinto/ImageMagick-action@v1
       with:
         # ImageMagick command to be executed
-        command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 readme/output-%03d.jpg
+        command: convert -density 300 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 100 output-%03d.jpg
     - name: Commit to orphan branch
       run: | 
         git checkout --orphan readme_images
