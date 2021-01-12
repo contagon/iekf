@@ -9,10 +9,15 @@ on:
     paths:
       - 'writeup.pdf'
       - '.README.md'
+      - '.github/workflows/writeup_readme.yml'
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      ORPHAN_BRANCH: readme_images
+      QUALITY: 85
+      DPI: 250
     steps:
     - uses: actions/checkout@v2
       with:
@@ -23,12 +28,12 @@ jobs:
     - name: Convert Writeup to Images
       uses: jruipinto/ImageMagick-action@v1
       with:
-        command: convert -density 250 -trim -colorspace sRGB -alpha remove writeup.pdf -quality 85 output-%03d.jpg
+        command: convert -density ${{env.DPI}} -trim -colorspace sRGB -alpha remove writeup.pdf -quality ${{env.QUALITY}} output-%03d.jpg
 
     ## COMMIT THEM TO A ORPHAN BRANCH
     - name: Commit images to orphan branch
       run: | 
-        git checkout --orphan readme_images
+        git checkout --orphan ${{env.ORPHAN_BRANCH}}
         touch .README.md
         mv .README.md .README.temp
         git rm -rf .
@@ -40,7 +45,7 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: readme_images
+        branch: ${{ env.ORPHAN_BRANCH }}
         force: true
 
     ## UPDATE README IN BRANCH IF IT NEEDS TO BE UPDATED
@@ -49,7 +54,7 @@ jobs:
       run: |
         echo $'\n' >> .README.temp
         for filename in *.jpg; do \
-          echo '![image](https://github.com/'$GITHUB_REPOSITORY'/blob/readme_images/'$filename'?raw=true)' >> .README.temp;  \
+          echo '![image](https://github.com/'$GITHUB_REPOSITORY'/blob/${{env.ORPHAN_BRANCH}}/'$filename'?raw=true)' >> .README.temp;  \
         done
         git checkout ${{ github.ref }}
         rm README.md || (exit 0)
