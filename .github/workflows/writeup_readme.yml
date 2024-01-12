@@ -61,7 +61,7 @@ jobs:
         mv .README.temp README.md
         OUTPUT=0
         git diff --exit-code README.md || OUTPUT=$?
-        echo "::set-output name=OUTPUT::$OUTPUT"
+        echo "OUTPUT=$OUTPUT" >> $GITHUB_OUTPUT
     - name: Commit new README (if changed)
       if: steps.main.outputs.OUTPUT == 1
       run: |
